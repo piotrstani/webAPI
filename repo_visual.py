@@ -6,10 +6,11 @@ from plotly import offline
 url = 'https://api.github.com/search/repositories?q=language:python&sort=stars'
 
 headers ={'Accept': 'application/vnd.github.v3+json'}
-r = requests.get(url, headers=headers)
-print(f"Kod stanu: {r.status_code}")
+response = requests.get(url, headers=headers, timeout=10)
+print(f"Kod stanu: {response.status_code}")
+response.raise_for_status()
 
-response_dict = r.json()
+response_dict = response.json()
 repo_dicts = response_dict['items']
 
 
