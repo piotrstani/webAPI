@@ -1,5 +1,5 @@
 import requests
-from plotly.graph_objs import Bar
+#from plotly.graph_objs import Bar
 from plotly import offline
 
 
@@ -11,24 +11,57 @@ print(f"Kod stanu: {r.status_code}")
 
 response_dict = r.json()
 repo_dicts = response_dict['items']
-repo_names, stars = [],[]
-for repo_dict in repo_dicts:
-    repo_names.append(repo_dict['name'])
-    stars.append(repo_dict['stargazers_count'])
 
-data =[{
-    'type': 'bar',
-    'x': repo_names,
-    'y': stars,
-}]
 
-my_layout = {
- 'title' : 'Projekty python z największą liczbą gwiadek',
- 'xaxis': {'title':'Repositories'},
- 'yaxis': {'title':'Stars'},
-}
+def github_repos_stars(repositories):
+    repo_links, stars, labels = [], [], []
+    for repo_dict in repositories:
+        repo_name = repo_dict['name']
+        repo_url = repo_dict['html_url']
+        repo_link = f"<a href='{repo_url}'>{repo_name}</a>"
+        repo_links.append(repo_link)
+        stars.append(repo_dict['stargazers_count'])
 
-fig = {'data': data, 'layout': my_layout}
-offline.plot(fig, filename='repo_visual.html')
+        # Podpowiedzi
+        owner = repo_dict['owner']['login']
+        description = repo_dict['description']
+        label = f"{owner}<br />{description}"
+        labels.append(label)
 
-#test
+    # Wizualizacja
+    data = [{
+        'type': 'bar',
+        'x': repo_links,
+        'y': stars,
+        'hovertext': labels,
+        'marker': {
+            'color': 'rgb(60,100,150)',
+            'line': {'width': 1.5, 'color': 'rgb(60,100,150)'}
+        },
+        'opacity': 0.6,
+    }]
+
+    my_layout = {
+        'title': {
+            'text': 'Projekty python z największą liczbą gwiadek',
+            'font': {'size': 28},
+        },
+        'xaxis': {
+            'title': {
+                'text': 'Repositories',
+                'font': {'size': 24}
+            },
+            'tickfont': {'size': 14},
+        },
+
+        'yaxis': {'title': {
+            'text': 'Stars',
+            'font': {'size': 24},
+        },
+            'tickfont': {'size': 14}, },
+    }
+
+    fig = {'data': data, 'layout': my_layout}
+    offline.plot(fig, filename='repo_visual.html')
+
+github_repos_stars(repo_dicts)
