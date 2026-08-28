@@ -1,22 +1,22 @@
 import requests
-#from plotly.graph_objs import Bar
 from plotly import offline
 
+# Pobierz dane z GitHuba
+def get_github_repos():
+    url = 'https://api.github.com/search/repositories?q=language:python&sort=stars'
+    headers = {'Accept': 'application/vnd.github.v3+json'}
 
-url = 'https://api.github.com/search/repositories?q=language:python&sort=stars'
+    response = requests.get(url, headers=headers, timeout=10)
+    print(f"Kod stanu: {response.status_code}")
+    response.raise_for_status()
 
-headers ={'Accept': 'application/vnd.github.v3+json'}
-response = requests.get(url, headers=headers, timeout=10)
-print(f"Kod stanu: {response.status_code}")
-response.raise_for_status()
+    return response.json()['items']
 
-response_dict = response.json()
-repo_dicts = response_dict['items']
-
-
+# Przetwórz dane i zwizualizuj dane
 def github_repos_stars(repositories):
     repo_links, stars, labels = [], [], []
     for repo_dict in repositories:
+        # Klikalne etykiety dla repozytoriów
         repo_name = repo_dict['name']
         repo_url = repo_dict['html_url']
         repo_link = f"<a href='{repo_url}'>{repo_name}</a>"
@@ -25,7 +25,7 @@ def github_repos_stars(repositories):
 
         # Podpowiedzi
         owner = repo_dict['owner']['login']
-        description = repo_dict['description']
+        description = repo_dict['description'] or 'Brak opisu'
         label = f"{owner}<br />{description}"
         labels.append(label)
 
@@ -44,7 +44,7 @@ def github_repos_stars(repositories):
 
     my_layout = {
         'title': {
-            'text': 'Projekty python z największą liczbą gwiadek',
+            'text': 'Projekty Python z największą liczbą gwiazdek',
             'font': {'size': 28},
         },
         'xaxis': {
@@ -65,4 +65,5 @@ def github_repos_stars(repositories):
     fig = {'data': data, 'layout': my_layout}
     offline.plot(fig, filename='repo_visual.html')
 
-github_repos_stars(repo_dicts)
+repos = get_github_repos()
+github_repos_stars(repos)
