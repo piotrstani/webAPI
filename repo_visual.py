@@ -12,23 +12,27 @@ def get_github_repos():
 
     return response.json()['items']
 
-# Przetwórz dane i zwizualizuj dane
-def github_repos_stars(repositories):
-    repo_links, stars, labels = [], [], []
+def prepare_repos_data(repositories):
+    repo_links = []
+    stars = []
+    labels = []
+
     for repo_dict in repositories:
         # Klikalne etykiety dla repozytoriów
         repo_name = repo_dict['name']
         repo_url = repo_dict['html_url']
-        repo_link = f"<a href='{repo_url}'>{repo_name}</a>"
-        repo_links.append(repo_link)
+
+        repo_links.append(f"<a href='{repo_url}'>{repo_name}</a>")
         stars.append(repo_dict['stargazers_count'])
 
         # Podpowiedzi
         owner = repo_dict['owner']['login']
         description = repo_dict['description'] or 'Brak opisu'
-        label = f"{owner}<br />{description}"
-        labels.append(label)
+        labels.append(f"{owner}<br />{description}")
 
+    return repo_links, stars, labels
+
+def create_bar_chart(repo_links, stars, labels):
     # Wizualizacja
     data = [{
         'type': 'bar',
@@ -61,9 +65,28 @@ def github_repos_stars(repositories):
         },
             'tickfont': {'size': 14}, },
     }
+    return {'data': data, 'layout': my_layout}
 
-    fig = {'data': data, 'layout': my_layout}
-    offline.plot(fig, filename='repo_visual.html')
 
-repos = get_github_repos()
-github_repos_stars(repos)
+def save_chart(fig,filename):
+    offline.plot(fig, filename=filename)
+
+
+
+def main():
+    repositories = get_github_repos()
+
+    repo_links, stars, labels = prepare_repos_data(repositories
+    )
+
+    fig = create_bar_chart(
+        repo_links,
+        stars,
+        labels
+    )
+
+    save_chart(fig, "repo_visual.html")
+
+
+if __name__ == "__main__":
+    main()
