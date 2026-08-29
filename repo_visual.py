@@ -1,36 +1,26 @@
-import requests
 from plotly import offline
 
-# Pobierz dane z GitHuba
-def get_github_repos():
-    url = 'https://api.github.com/search/repositories?q=language:python&sort=stars'
-    headers = {'Accept': 'application/vnd.github.v3+json'}
 
-    response = requests.get(url, headers=headers, timeout=10)
-    print(f"Kod stanu: {response.status_code}")
-    response.raise_for_status()
-
-    return response.json()['items']
-
-def prepare_repos_data(repositories):
+def prepare_repos_stars_data(repositories):
     repo_links = []
     stars = []
     labels = []
 
-    for repo_dict in repositories:
+    for repo in repositories:
         # Klikalne etykiety dla repozytoriów
-        repo_name = repo_dict['name']
-        repo_url = repo_dict['html_url']
+        repo_name = repo['name']
+        repo_url = repo['html_url']
 
         repo_links.append(f"<a href='{repo_url}'>{repo_name}</a>")
-        stars.append(repo_dict['stargazers_count'])
+        stars.append(repo['stargazers_count'])
 
         # Podpowiedzi
-        owner = repo_dict['owner']['login']
-        description = repo_dict['description'] or 'Brak opisu'
+        owner = repo['owner']['login']
+        description = repo['description'] or 'Brak opisu'
         labels.append(f"{owner}<br />{description}")
 
     return repo_links, stars, labels
+
 
 def create_bar_chart(repo_links, stars, labels):
     # Wizualizacja
@@ -73,20 +63,3 @@ def save_chart(fig,filename):
 
 
 
-def main():
-    repositories = get_github_repos()
-
-    repo_links, stars, labels = prepare_repos_data(repositories
-    )
-
-    fig = create_bar_chart(
-        repo_links,
-        stars,
-        labels
-    )
-
-    save_chart(fig, "repo_visual.html")
-
-
-if __name__ == "__main__":
-    main()

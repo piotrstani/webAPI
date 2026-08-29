@@ -1,34 +1,31 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-
-import requests
-
-url = 'https://api.github.com/search/repositories?q=language:python&sort=stars'
-
-headers ={'Accept': 'application/vnd.github.v3+json'}
-r = requests.get(url, headers=headers)
-print(f"Kod stanu: {r.status_code}")
-response_dict=r.json()
-print(response_dict.keys())
+import api_github
+import repo_visual
 
 
-print(f"Liczba repos: {response_dict['total_count']}")
+def main():
+    repositories = api_github.get_github_repos(
+        url=api_github.GITHUB_API_URL,
+        headers=api_github.GITHUB_HEADERS,
+        params=api_github.GITHUB_PARAMS
+    )
 
-repo_dicts=response_dict['items']
+    repo_links, stars, labels = (
+        repo_visual.prepare_repos_stars_data(
+            repositories
+        )
+    )
 
-print(f"Liczba zwróconychy repos: {len(repo_dicts)}")
+    fig = repo_visual.create_bar_chart(
+        repo_links,
+        stars,
+        labels
+    )
 
-repo_dict=repo_dicts[0]
-print(f"\nKlucze: {len(repo_dict)}")
+    repo_visual.save_chart(
+        fig,
+        "repo_visual.html"
+    )
 
-#for key in sorted(repo_dict.keys()):
-#    print(f"{key}")
-i=0
-for repo in repo_dicts:
-    i += 1
-    print(f"\n{i}")
-    print(f"Nazwa: {repo_dict['name']}")
-    print(f"Właściciel: {repo_dict['owner']['login']}")
-    print(f"Gwiazdki: {repo_dict['stargazers_count']}")
-    print(f"Repozytorium: {repo_dict['html_url']}")
-    print(f"Opis: {repo_dict['description']}")
+
+if __name__ == "__main__":
+    main()
