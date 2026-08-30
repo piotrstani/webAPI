@@ -22,17 +22,28 @@ GITHUB_HEADERS = {'Accept': 'application/vnd.github.v3+json'}
 
 # Pobierz dane z GitHuba
 def get_github_response(url,headers,params):
-    http_response = requests.get(
-        url,
-        params=params,
-        headers=headers,
-        timeout=10
-    )
-    print(f"Kod stanu: {http_response.status_code}")
-    http_response.raise_for_status()
+    try:
+        http_response = requests.get(
+            url,
+            params=params,
+            headers=headers,
+            timeout=10
+        )
+        print(f"Kod stanu: {http_response.status_code}")
+        http_response.raise_for_status()
+        return http_response.json()
 
-    return http_response.json()
+    except requests.Timeout:
+        print("Przekroczono limit czasu połączenia z GitHub API.")
+        return None
 
+    except requests.HTTPError as exc:
+        print(f"Błąd HTTP: {exc}")
+        return None
+
+    except requests.RequestException as exc:
+        print(f"Błąd połączenia: {exc}")
+        return None
 
 
 def print_github_repos(print_response):
