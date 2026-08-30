@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+from pprint import pprint
 
 # api_github.py
 # API
@@ -12,6 +13,8 @@
 
 
 import requests
+import json
+from typing import Any
 
 GITHUB_API_URL = "https://api.github.com/search/repositories"
 GITHUB_PARAMS = {
@@ -21,7 +24,7 @@ GITHUB_PARAMS = {
 GITHUB_HEADERS = {'Accept': 'application/vnd.github.v3+json'}
 
 # Pobierz dane z GitHuba
-def get_github_response(url,headers,params):
+def get_github_response(url: str, headers: dict[str, str], params: dict[str, Any]) -> dict[str, Any]:
     try:
         http_response = requests.get(
             url,
@@ -46,7 +49,7 @@ def get_github_response(url,headers,params):
         return None
 
 
-def print_github_repos(print_response):
+def print_github_repos(print_response: list[dict[str, Any]]) -> None:
 
     print(f"Liczba repos: {print_response['total_count']}")
 
@@ -62,9 +65,7 @@ def print_github_repos(print_response):
     for key in sorted(first_repo.keys()):
         print(f"  {key}")
 
-    i=0
-    for repo in repo_dicts:
-        i += 1
+    for i, repo in enumerate(repo_dicts, start=1):
         print(f"\n{i}")
         print(f"Nazwa: {repo['name']}")
         print(f"Właściciel: {repo['owner']['login']}")
@@ -73,7 +74,7 @@ def print_github_repos(print_response):
         print(f"Opis: {repo['description']}")
 
 # Pobierz dane z GitHuba
-def get_github_repos(url, headers,params):
+def get_github_repos(url: str, headers: dict[str, str], params: dict[str, Any]) -> dict[str, Any]:
     response_dict = get_github_response(
         url,
         headers,
@@ -83,14 +84,14 @@ def get_github_repos(url, headers,params):
 
 
 
-#print_github_repos(get_github_response(GITHUB_API_URL,GITHUB_HEADERS,GITHUB_PARAMS))
+#
 
 if __name__ == "__main__":
-    response = get_github_response(
-        url=GITHUB_API_URL,
-        headers=GITHUB_HEADERS,
-        params=GITHUB_PARAMS
-    )
+    r = get_github_response(url=GITHUB_API_URL, headers=GITHUB_HEADERS, params=GITHUB_PARAMS)
+    pprint(r["items"][0])
+    #print(json.dumps(r["items"][0], indent=4, ensure_ascii=False))
+    #print_github_repos(r)
 
-    print_github_repos(response)
+
+
 
